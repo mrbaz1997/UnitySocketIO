@@ -4,44 +4,51 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
+
 public class TestSocketIO : MonoBehaviour
 {
     public TMP_InputField message;
-    private string serverUrl = "https://stage.socket.medrick.info/";
+    private string serverUrl = "ws://stage.socket.medrick.info:3000/stream";
 
-    SocketIO socket;
+    SocketIOUnity socket;
 
     void Start()
     {
         Debug.Log("Start to connect");
         var uri = new Uri(serverUrl);
-        //socket = new SocketIOUnity(uri, new SocketIOOptions
-        //{
+        socket = new SocketIOUnity(uri, new SocketIOOptions
+        {
         //    Query = new Dictionary<string, string>
         //{
         //    {"token", "UNITY" }
         //}
         //    ,
-        //    Transport = SocketIOClient.Transport.TransportProtocol.WebSocket
-        //});
+          Transport = SocketIOClient.Transport.TransportProtocol.Polling
+            
+        }) ;
 
-        socket = new SocketIO(serverUrl);
+
+        //socket = new SocketIO(serverUrl);
         socket.OnConnected += Socket_OnConnected;
-        socket.ConnectAsync();
+        socket.Connect();
         // Connect to the server
 
       //  socket.Connect();
         socket.OnError += Socket_OnError;
         socket.OnReconnectAttempt += Socket_OnReconnectAttempt;
         socket.OnReconnectError += Socket_OnReconnectError;
-        socket.OnConnected += Socket_OnConnected;
         socket.OnReconnectFailed += Socket_OnReconnectFailed;
+        socket.On("new_user",
+            (data) =>
+            {
+                Debug.Log(data);
+            });
 
         socket.On("chat message",
             callback: (msg) =>
             {
                 Debug.Log("message: " + msg);
-            });
+            }); 
     }
 
     private void Socket_OnReconnectFailed(object sender, EventArgs e)
@@ -62,8 +69,8 @@ public class TestSocketIO : MonoBehaviour
     private void Socket_OnConnected(object sender, System.EventArgs e)
     {
         Debug.Log("CONNECTEDDDDDDDDDDDD");
-
-        socket.EmitAsync("chat message", "Hello from Unity!");
+        Debug.Log(socket.Namespace);
+        socket.Emit("subscribe", new Dictionary<string,string>(){ { "room", "IDSINGLE" }, { "socketId", "Idris" } });
     }
 
     private void Socket_OnReconnectAttempt(object sender, int e)
