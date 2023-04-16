@@ -8,7 +8,7 @@ using UnityEngine;
 public class TestSocketIO : MonoBehaviour
 {
     public TMP_InputField message;
-    private string serverUrl = "ws://stage.socket.medrick.info:3000/stream";
+    private string serverUrl = "http://stage.socket.medrick.info:3000/stream";
 
     SocketIOUnity socket;
 
@@ -18,15 +18,14 @@ public class TestSocketIO : MonoBehaviour
         var uri = new Uri(serverUrl);
         socket = new SocketIOUnity(uri, new SocketIOOptions
         {
-        //    Query = new Dictionary<string, string>
-        //{
-        //    {"token", "UNITY" }
-        //}
-        //    ,
-          Transport = SocketIOClient.Transport.TransportProtocol.Polling
+            Query = new Dictionary<string, string>
+            {
+                {"authorization", "token jwt" }
+            }
+            ,
+            Transport = SocketIOClient.Transport.TransportProtocol.Polling
             
         }) ;
-
 
         //socket = new SocketIO(serverUrl);
         socket.OnConnected += Socket_OnConnected;
@@ -69,7 +68,6 @@ public class TestSocketIO : MonoBehaviour
     private void Socket_OnConnected(object sender, System.EventArgs e)
     {
         Debug.Log("CONNECTEDDDDDDDDDDDD");
-        Debug.Log(socket.Namespace);
         socket.Emit("subscribe", new Dictionary<string,string>(){ { "room", "IDSINGLE" }, { "socketId", "Idris" } });
     }
 
